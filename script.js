@@ -69,7 +69,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // Call immediately
     checkAuthStatus();
 
     async function fetchEvents() {
@@ -86,7 +85,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const events = await res.json();
             currentCalendarEvents = events;
             
-            // Re-confirm auth status on successful fetch
             checkAuthStatus();
             
             if (events.length === 0) {
@@ -314,6 +312,17 @@ document.addEventListener('DOMContentLoaded', () => {
         categories.forEach(cat => {
             if (settings[cat.id] === undefined) settings[cat.id] = [];
 
+            settings[cat.id].sort((a, b) => {
+                const getDur = (r) => {
+                    let v = parseInt(r.val) || 0;
+                    if (r.unit === 'hours') return v * 60;
+                    if (r.unit === 'days') return v * 60 * 24;
+                    if (r.unit === 'weeks') return v * 60 * 24 * 7;
+                    return v;
+                };
+                return getDur(a) - getDur(b);
+            });
+
             const groupDiv = document.createElement('div');
             groupDiv.className = 'reminder-group';
             groupDiv.innerHTML = `
@@ -338,11 +347,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.updateSetting = (type, index, field, value) => {
         if (!settings[type] || !settings[type][index]) return;
+
+        const item = settings[type][index];
+        const limits = { 'minutes': 40320, 'hours': 672, 'days': 28, 'weeks': 4 };
+
         if (field === 'val') {
-            const parsed = parseInt(value, 10);
-            settings[type][index].val = isNaN(parsed) ? 0 : parsed;
+            let parsed = parseInt(value, 10);
+            parsed = isNaN(parsed) ? 0 : parsed;
+            
+            const max = limits[item.unit] || 40320;
+            if (parsed > max) parsed = max;
+            if (parsed < 0) parsed = 0;
+            
+            item.val = parsed;
         } else {
-            settings[type][index][field] = value;
+            item[field] = value;
+            if (field === 'unit') {
+                const max = limits[value] || 40320;
+                if (item.val > max) item.val = max;
+            }
         }
         renderSettings();
     };

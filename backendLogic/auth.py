@@ -2,13 +2,18 @@ import os
 import flask
 from flask import Blueprint, redirect, url_for, session, request
 from google_auth_oauthlib.flow import Flow
+from googleapiclient.discovery import build
 
-# Allow HTTP for local dev
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 auth_bp = Blueprint('auth', __name__)
 
-SCOPES = ['https://www.googleapis.com/auth/calendar.events']
+SCOPES = [
+    'https://www.googleapis.com/auth/calendar',
+    'https://www.googleapis.com/auth/calendar.events',
+    'https://www.googleapis.com/auth/userinfo.email',
+    'openid'
+]
 
 @auth_bp.route('/login')
 def login():
@@ -58,7 +63,9 @@ def callback():
             'scopes': credentials.scopes
         }
         
-        session['user_email'] = "Authenticated User" 
+        user_info_service = build('oauth2', 'v2', credentials=credentials)
+        user_info = user_info_service.userinfo().get().execute()
+        session['user_email'] = user_info.get('email', 'No Email Found')
         
         return redirect('/')
     except Exception as e:

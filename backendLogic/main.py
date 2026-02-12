@@ -12,7 +12,7 @@ from flask_cors import CORS
 from auth import auth_bp
 from dotenv import dotenv_values
 
-app = Flask(__name__, static_folder='.', static_url_path='')
+app = Flask(__name__, static_folder='../', static_url_path='')
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", dotenv_values("flask.env").get('FLASK_SECRET_KEY', "dev_unsafe_key_fallback"))
 app.register_blueprint(auth_bp)
 
@@ -31,11 +31,11 @@ limiter = Limiter(
 
 @app.route('/')
 def index():
-    return send_from_directory('.', 'index.html')
+    return send_from_directory('../', 'index.html')
 
 @app.route('/<path:path>')
 def serve_static(path):
-    return send_from_directory('.', path)
+    return send_from_directory('../', path)
 
 @app.route('/api/events', methods=['GET'])
 def get_events():
@@ -56,6 +56,10 @@ def get_user():
     if 'credentials' not in session:
         return jsonify({"loggedIn": False})
     
+    if session.get('user_email') == "Authenticated User":
+        session.clear()
+        return jsonify({"loggedIn": False})
+        
     return jsonify({
         "loggedIn": True,
         "email": session.get('user_email')

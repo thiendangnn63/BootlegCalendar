@@ -65,7 +65,6 @@ class SyllabusAnalyzer:
         8. Only include events in these categories: {categories_str}.
         """
 
-        # Handle different API_KEYS formats (list vs dict_values)
         keys_list = list(self.API_KEYS)
 
         for api_key in keys_list:
