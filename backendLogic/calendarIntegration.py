@@ -6,7 +6,6 @@ class GoogleCalendarClient:
         self.service = build('calendar', 'v3', credentials=credentials)
 
     def fetchEvents(self, max_results=50):
-        # Fetch from now onwards
         now = datetime.datetime.utcnow().isoformat() + 'Z'
         try:
             events_result = self.service.events().list(
@@ -21,7 +20,6 @@ class GoogleCalendarClient:
     def addEvents(self, events):
         results = []
         for event in events:
-            # Clean up fields that might cause 400 errors if passed blindly
             body = {
                 'summary': event.get('summary'),
                 'description': event.get('description', ''),
@@ -41,11 +39,10 @@ class GoogleCalendarClient:
                 results.append(res)
             except Exception as e:
                 print(f"Error adding event {event.get('summary')}: {e}")
-                # Don't raise, try to continue adding others
         return results
 
     def updateEvents(self, events):
-        # Placeholder for update logic if needed
+        # TODO: find a use for ts cuz idk what to do with this
         pass
 
     def deleteEvents(self, event_ids):
