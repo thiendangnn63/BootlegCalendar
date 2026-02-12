@@ -1,5 +1,4 @@
 import os
-import flask
 from flask import Blueprint, redirect, url_for, session, request
 from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
