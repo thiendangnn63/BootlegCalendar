@@ -11,11 +11,15 @@ from backendLogic.syllabus import SyllabusAnalyzer
 from flask_cors import CORS
 from backendLogic.auth import auth_bp
 from dotenv import dotenv_values
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 env_path = os.path.join(BASE_DIR, 'flask.env')
 
 app = Flask(__name__, static_folder=BASE_DIR, static_url_path='')
+# Fix for running behind a proxy (like Render/Nginx) so IP addresses are correct
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
+
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", dotenv_values(env_path).get('FLASK_SECRET_KEY', "dev_unsafe_key_fallback"))
 app.register_blueprint(auth_bp)
 
@@ -69,7 +73,6 @@ def get_user():
     })
 
 @app.route('/api/analyze', methods=['POST'])
-@limiter.limit("20 per minute")
 def analyze_syllabus():
     if 'file' not in request.files:
         return jsonify({"error": "No file uploaded"}), 400
