@@ -16,7 +16,6 @@ SCOPES = [
 ]
 
 def get_flow(**kwargs):
-    # Use absolute path for robustness on AWS/Linux servers
     BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
     creds_path = os.path.join(BASE_DIR, 'data', 'street_creds_web.json')
     
