@@ -7,12 +7,18 @@ from dotenv import dotenv_values
 
 class SyllabusAnalyzer:
     def __init__(self, file, categories=None, colorId='1'):
-        # Fix path for api.env
         import os
         BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
         env_path = os.path.join(BASE_DIR, "api.env")
         
-        self.API_KEYS = dotenv_values(env_path).values()
+        self.API_KEYS = list(dotenv_values(env_path).values())
+        
+        if not self.API_KEYS and os.environ.get("GEMINI_API_KEY"):
+            self.API_KEYS = [os.environ.get("GEMINI_API_KEY")]
+            
+        if not self.API_KEYS:
+            print("Warning: No Gemini API keys found in api.env or GEMINI_API_KEY environment variable.")
+
         self.MODELS = [
             "gemini-2.5-flash",
             "gemini-2.5-flash-lite",
