@@ -10,6 +10,7 @@ from syllabus import SyllabusAnalyzer
 from flask_cors import CORS
 from auth import auth_bp
 from dotenv import dotenv_values
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -21,6 +22,8 @@ for path in flask_env_paths:
         break
 
 app = Flask(__name__, static_folder=BASE_DIR, static_url_path='')
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
+
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", flask_config.get('FLASK_SECRET_KEY', "dev_unsafe_key_fallback"))
 app.register_blueprint(auth_bp)
 
