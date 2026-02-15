@@ -1,9 +1,12 @@
 import json
 import pathlib
+import boto3
 from datetime import datetime
 from google import genai
 from google.genai import types
 from dotenv import dotenv_values
+from botocore.exceptions import ClientError
+
 
 class SyllabusAnalyzer:
     def __init__(self, file, categories=None, colorId='1'):
@@ -18,11 +21,7 @@ class SyllabusAnalyzer:
                 break
         
         if not api_keys:
-            api_keys = ["KEY_ONE",
-                        "KEY_TWO",
-                        "KEY_THREE",
-                        "KEY_FOUR",
-                        "KEY_FIVE"]
+            api_keys = self.get_secret()
 
         self.API_KEYS = api_keys
         self.MODELS = [
@@ -34,6 +33,25 @@ class SyllabusAnalyzer:
         ]
         self.categories = categories
         self.events = self.loadFile(file, colorId)
+
+    def get_secret(self):
+        secret_name = "GEMINI_API_KEYS"
+        region_name = "us-east-1"
+
+        session = boto3.session.Session()
+        client = session.client(
+            service_name='secretsmanager',
+            region_name=region_name
+        )
+
+        try:
+            get_secret_value_response = client.get_secret_value(
+                SecretId=secret_name
+            )
+        except ClientError as e:
+            raise e
+
+        return list(json.loads(get_secret_value_response['SecretString']).values())
     
     def loadFile(self, filepath, colorId):
         categories_str = ", ".join(self.categories) if self.categories else "All academic events"
@@ -82,12 +100,15 @@ class SyllabusAnalyzer:
         8. Only include events in these categories: {categories_str}.
         """
 
-        keys_list = list(self.API_KEYS)
+        for i, api_key in enumerate(self.API_KEYS):
+            masked_key = api_key[:4] + "..." + api_key[-4:] if len(api_key) > 8 else "INVALID"
+            print(f"DEBUG: Trying API Key #{i+1} ({masked_key})")
 
-        for api_key in keys_list:
             for model in self.MODELS:
+                print(f"DEBUG: Attempting model '{model}'")
                 try:
                     client = genai.Client(api_key=api_key)
+                    print(f"DEBUG: Sending prompt to {model}...")
                     response = client.models.generate_content(
                         model=model,
                         contents=[
