@@ -44,10 +44,6 @@ limiter = Limiter(
 def index():
     return send_from_directory(BASE_DIR, 'index.html')
 
-@app.route('/<path:path>')
-def serve_static(path):
-    return send_from_directory(BASE_DIR, path)
-
 @app.route('/api/events', methods=['GET'])
 def get_events():
     if 'credentials' not in session:
@@ -161,6 +157,10 @@ def delete_events():
         return jsonify({"status": "success", "deleted_count": count})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route('/<path:path>')
+def serve_static(path):
+    return send_from_directory(BASE_DIR, path)
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 8080))
