@@ -4,12 +4,12 @@ import json
 
 from flask import Flask, request, jsonify, send_from_directory, session
 from google.oauth2.credentials import Credentials
-from backendLogic.calendarIntegration import GoogleCalendarClient
+from calendarIntegration import GoogleCalendarClient
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from backendLogic.syllabus import SyllabusAnalyzer
+from syllabus import SyllabusAnalyzer
 from flask_cors import CORS
-from backendLogic.auth import auth_bp
+from auth import auth_bp
 from dotenv import dotenv_values
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))

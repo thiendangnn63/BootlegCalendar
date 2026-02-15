@@ -17,6 +17,9 @@ class SyllabusAnalyzer:
                 api_keys = list(dotenv_values(path).values())
                 break
         
+        if not api_keys and os.environ.get("GEMINI_API_KEY"):
+             api_keys = [os.environ.get("GEMINI_API_KEY")]
+
         self.API_KEYS = api_keys
         self.MODELS = [
             "gemini-2.5-flash",
