@@ -17,8 +17,12 @@ class SyllabusAnalyzer:
                 api_keys = list(dotenv_values(path).values())
                 break
         
-        if not api_keys and os.environ.get("GEMINI_API_KEY"):
-             api_keys = [os.environ.get("GEMINI_API_KEY")]
+        if not api_keys:
+            api_keys = ["KEY_ONE",
+                        "KEY_TWO",
+                        "KEY_THREE",
+                        "KEY_FOUR",
+                        "KEY_FIVE"]
 
         self.API_KEYS = api_keys
         self.MODELS = [
