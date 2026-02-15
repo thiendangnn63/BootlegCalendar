@@ -36,3 +36,9 @@ The rest is pretty intuitive, shoot me a message on IG if you don't understand s
 
 This project is free for personal and educational use. You are welcome to fork the repository and submit pull requests to contribute to the project.
 Commercial use is strictly prohibited. You may not sell this code, use it in a commercial product, or use it for any revenue-generating purpose without prior written permission.
+
+### KNOWN PROBLEMS
+
+Currently, if you log in then exit the website, it says "Failed to fetch events" when you access the website later.
+I think this is happening because the session expired, so I'm still figuring out how to fix this.
+For now, whenever this happens, just "Log out" then "Log in" again, that should fix it.
