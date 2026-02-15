@@ -33,3 +33,6 @@ For each event type (exam or assignments, for example), you can input reminders 
 The rest is pretty intuitive, shoot me a message on IG if you don't understand something, **@36dtnn**.
 
 **Thanks for using my website, please star this repository if it helped you!**
+
+This project is free for personal and educational use. You are welcome to fork the repository and submit pull requests to contribute to the project.
+Commercial use is strictly prohibited. You may not sell this code, use it in a commercial product, or use it for any revenue-generating purpose without prior written permission.
