@@ -78,6 +78,9 @@ def get_user():
 
 @app.route('/api/analyze', methods=['POST'])
 def analyze_syllabus():
+    if 'credentials' not in session:
+        return jsonify({"error": "User not logged in"}), 401
+
     if 'file' not in request.files:
         return jsonify({"error": "No file uploaded"}), 400
     
@@ -88,12 +91,21 @@ def analyze_syllabus():
     categories = request.form.getlist('categories')
     colorId = request.form.get('colorId', '1')
 
+    user_timezone = 'UTC'
+    if 'credentials' in session:
+        try:
+            creds = Credentials(**session['credentials'])
+            calendar_bot = GoogleCalendarClient(credentials=creds)
+            user_timezone = calendar_bot.get_timezone()
+        except Exception as e:
+            print(f"Error fetching timezone: {e}")
+
     with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(file.filename)[1]) as temp:
         file.save(temp.name)
         temp_path = temp.name
 
     try:
-        analyzer = SyllabusAnalyzer(temp_path, categories=categories, colorId=colorId)
+        analyzer = SyllabusAnalyzer(temp_path, categories=categories, colorId=colorId, user_timezone=user_timezone)
         events = analyzer.events
     except Exception as e:
         print(e)

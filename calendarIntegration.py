@@ -5,8 +5,9 @@ class GoogleCalendarClient:
     def __init__(self, credentials):
         self.service = build('calendar', 'v3', credentials=credentials)
 
+
     def fetchEvents(self, max_results=50):
-        now = datetime.datetime.now().isoformat() + 'Z'
+        now = datetime.datetime.now(datetime.timezone.utc).isoformat()
         try:
             events_result = self.service.events().list(
                 calendarId='primary', timeMin=now,
@@ -16,6 +17,14 @@ class GoogleCalendarClient:
         except Exception as e:
             print(f"Error fetching events: {e}")
             raise e
+
+    def get_timezone(self):
+        try:
+            calendar = self.service.calendars().get(calendarId='primary').execute()
+            return calendar.get('timeZone', 'UTC')
+        except Exception as e:
+            print(f"Error fetching timezone: {e}")
+            return 'UTC'
 
     def addEvents(self, events):
         results = []

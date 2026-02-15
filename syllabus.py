@@ -2,6 +2,7 @@ import json
 import pathlib
 import boto3
 from datetime import datetime
+from dateutil import tz
 from google import genai
 from google.genai import types
 from dotenv import dotenv_values
@@ -9,7 +10,7 @@ from botocore.exceptions import ClientError
 
 
 class SyllabusAnalyzer:
-    def __init__(self, file, categories=None, colorId='1'):
+    def __init__(self, file, categories=None, colorId='1', user_timezone='UTC'):
         import os
         BASE_DIR = os.path.dirname(os.path.abspath(__file__))
         
@@ -32,6 +33,7 @@ class SyllabusAnalyzer:
             "gemini-3-pro-preview"
         ]
         self.categories = categories
+        self.user_timezone = user_timezone
         self.events = self.loadFile(file, colorId)
 
     def get_secret(self):
@@ -101,14 +103,9 @@ class SyllabusAnalyzer:
         """
 
         for i, api_key in enumerate(self.API_KEYS):
-            masked_key = api_key[:4] + "..." + api_key[-4:] if len(api_key) > 8 else "INVALID"
-            print(f"DEBUG: Trying API Key #{i+1} ({masked_key})")
-
             for model in self.MODELS:
-                print(f"DEBUG: Attempting model '{model}'")
                 try:
                     client = genai.Client(api_key=api_key)
-                    print(f"DEBUG: Sending prompt to {model}...")
                     response = client.models.generate_content(
                         model=model,
                         contents=[
@@ -140,7 +137,8 @@ class SyllabusAnalyzer:
         return []
 
     def filter_past_events(self, events):
-        now = datetime.now().astimezone()
+        user_tz = tz.gettz(self.user_timezone) or tz.UTC
+        now = datetime.now(user_tz)
         today = now.date()
         
         future_events = []
@@ -164,7 +162,7 @@ class SyllabusAnalyzer:
                     event_dt = datetime.fromisoformat(dt_str)
                     
                     if event_dt.tzinfo is None:
-                        event_dt = event_dt.replace(tzinfo=now.tzinfo)
+                        event_dt = event_dt.replace(tzinfo=user_tz)
 
                     if event_dt >= now:
                         future_events.append(event)
@@ -176,7 +174,7 @@ class SyllabusAnalyzer:
         return future_events
 
     def apply_timezone(self, events):
-        local_tz = datetime.now().astimezone().tzinfo
+        user_tz = tz.gettz(self.user_timezone) or tz.UTC
         
         for event in events:
             for key in ['start', 'end']:
@@ -191,8 +189,9 @@ class SyllabusAnalyzer:
                         
                         try:
                             dt_obj = datetime.strptime(time_str, "%Y-%m-%dT%H:%M:%S")
-                            dt_aware = dt_obj.replace(tzinfo=local_tz)
+                            dt_aware = dt_obj.replace(tzinfo=user_tz)
                             event[key]['dateTime'] = dt_aware.isoformat()
+                            event[key]['timeZone'] = self.user_timezone
                         except ValueError:
                             if not time_str.endswith('Z'):
                                 event[key]['dateTime'] = time_str + 'Z'
