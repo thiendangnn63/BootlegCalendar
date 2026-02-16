@@ -429,5 +429,78 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // --- Mobile Menu Toggle ---
+    const hamburgerBtn = document.getElementById('hamburger-btn');
+    const navLinks = document.getElementById('nav-links');
+
+    if (hamburgerBtn && navLinks) {
+        hamburgerBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            hamburgerBtn.classList.toggle('active');
+            navLinks.classList.toggle('active');
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (navLinks.classList.contains('active') && !navLinks.contains(e.target)) {
+                hamburgerBtn.classList.remove('active');
+                navLinks.classList.remove('active');
+            }
+        });
+    }
+
+    // --- Mobile Swipe Logic ---
+    const gridContainer = document.querySelector('.main-grid');
+    if (gridContainer) {
+        let x0 = null;
+        let i = 0; // Current index
+
+        function handleSwipe(start, end) {
+            const dx = end - start;
+            if (Math.abs(dx) > 50) { // Threshold
+                if (dx > 0 && i > 0) i--; // Swipe Right -> Prev
+                else if (dx < 0 && i < 2) i++; // Swipe Left -> Next
+                
+                gridContainer.style.setProperty('--i', i);
+            }
+        }
+
+        gridContainer.addEventListener('touchstart', e => {
+            x0 = e.changedTouches[0].clientX;
+            // Temporarily disable smooth transition for immediate response if we were tracking drag
+            // But here we just set it always
+            gridContainer.classList.remove('smooth'); 
+        }, {passive: true});
+
+        gridContainer.addEventListener('touchend', e => {
+            if (x0 !== null) {
+                handleSwipe(x0, e.changedTouches[0].clientX);
+                x0 = null;
+                gridContainer.classList.add('smooth'); // Re-enable transition
+            }
+        });
+        
+        // Mouse support for testing on desktop with mobile view
+        gridContainer.addEventListener('mousedown', e => {
+            if (window.innerWidth <= 768) x0 = e.clientX;
+        });
+        
+        gridContainer.addEventListener('mouseup', e => {
+            if (x0 !== null && window.innerWidth <= 768) {
+                handleSwipe(x0, e.clientX);
+                x0 = null;
+                gridContainer.classList.add('smooth');
+            }
+        });
+
+        // Reset on resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                gridContainer.style.removeProperty('--i');
+                i = 0;
+            }
+        });
+    }
+
     renderSettings();
 });

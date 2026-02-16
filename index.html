@@ -11,7 +11,12 @@
 <body>
     <nav class="navbar">
         <h1>Bootleg Calendar</h1>
-        <div class="nav-links">
+        <button class="hamburger" id="hamburger-btn" aria-label="Menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="nav-links" id="nav-links">
             <span id="user-email-display" class="small-text" style="align-self: center; margin-right: 10px; color: var(--text-muted); display: none;"></span>
             <a id="auth-btn" class="btn btn-nav" href="/login">Login</a>
             <a class="btn btn-nav" href="privacy_policy.html">Privacy</a>
@@ -19,9 +24,10 @@
             <a class="btn btn-nav" href="https://github.com/thiendangnn63" target="_blank" rel="noopener">GitHub</a>
         </div>
     </nav>
-    <div class="main-grid">
+    <div class="mobile-viewport">
+        <div class="main-grid">
 
-        <section class="panel" id="panel-home">
+            <section class="panel" id="panel-home">
             <h2>Upcoming events</h2>
             <p style="margin-bottom: 1rem;">View, tweak, and sync with Google Calendar.</p>
             
@@ -126,6 +132,7 @@
                 </div>
             </div>
         </section>
+        </div>
     </div>
 </body>
 </html>
