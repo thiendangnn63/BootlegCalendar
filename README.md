@@ -14,6 +14,7 @@ To use the website, you will first need to login to your Google account and gran
 
 * On the left column will be the upcoming events that the website found in your calendar, which you can mass select to mass delete (Not sure what else to use mass select for).
 * Currently, the website only supports uploading PDF, I will add the feature for uploading .docx (.jpg and .png, too if possible) soon enough.
+* A session lasts for 1 hour. Previously, if the session expires, the website fails and doesn't load anything. Now, it logs the user out and they have to login again. Currently, this is the only way and users have to log back in every hour.
 
 ### Reminder Settings
 
@@ -25,9 +26,6 @@ For each event type (exam or assignments, for example), you can input reminders 
 * The maximum value for reminder input is **40320 minutes** (4 weeks) because it's the maximum value allowed by Google Calendar.
 * If no reminder is specified, it automatically uses the default reminder from Google Calendar (30 minutes before the event).
 
-*I'm currently not sure if adding the feature to set reminder for individual events is necessary, please let me know!*
-*Also, because I don't have a budget, I limited each user to around 5 syllabi parses, sorry!*
-
 ---
 
 The rest is pretty intuitive, shoot me a message on IG if you don't understand something, **@36dtnn**.
@@ -36,9 +34,3 @@ The rest is pretty intuitive, shoot me a message on IG if you don't understand s
 
 This project is free for personal and educational use. You are welcome to fork the repository and submit pull requests to contribute to the project.
 Commercial use is strictly prohibited. You may not sell this code, use it in a commercial product, or use it for any revenue-generating purpose without prior written permission.
-
-### KNOWN PROBLEMS
-
-Currently, if you log in then exit the website, it says "Failed to fetch events" when you access the website later.
-I think this is happening because the session expired, so I'm still figuring out how to fix this.
-For now, whenever this happens, just "Log out" then "Log in" again, that should fix it.
