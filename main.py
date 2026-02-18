@@ -51,6 +51,10 @@ def get_events():
     
     try:
         creds = Credentials(**session['credentials'])
+        if creds.expired:
+            session.clear()
+            return jsonify({"error": "Session expired. Please log in again."}), 401
+
         calendar_bot = GoogleCalendarClient(credentials=creds)
         events = calendar_bot.fetchEvents()
         return jsonify(events if events else [])
@@ -76,6 +80,11 @@ def get_user():
 def analyze_syllabus():
     if 'credentials' not in session:
         return jsonify({"error": "User not logged in"}), 401
+    
+    creds = Credentials(**session['credentials'])
+    if creds.expired:
+        session.clear()
+        return jsonify({"error": "Session expired. Please log in again."}), 401
 
     if 'file' not in request.files:
         return jsonify({"error": "No file uploaded"}), 400
@@ -116,6 +125,11 @@ def analyze_syllabus():
 def add_events():
     if 'credentials' not in session:
         return jsonify({"error": "User not logged in"}), 401
+    
+    creds = Credentials(**session['credentials'])
+    if creds.expired:
+        session.clear()
+        return jsonify({"error": "Session expired. Please log in again."}), 401
 
     data = request.json
     events = data.get('events', [])
@@ -133,6 +147,11 @@ def update_event():
     if 'credentials' not in session:
         return jsonify({"error": "User not logged in"}), 401
     
+    creds = Credentials(**session['credentials'])
+    if creds.expired:
+        session.clear()
+        return jsonify({"error": "Session expired. Please log in again."}), 401
+    
     event = request.json
     try:
         creds = Credentials(**session['credentials'])
@@ -146,6 +165,11 @@ def update_event():
 def delete_events():
     if 'credentials' not in session:
         return jsonify({"error": "User not logged in"}), 401
+    
+    creds = Credentials(**session['credentials'])
+    if creds.expired:
+        session.clear()
+        return jsonify({"error": "Session expired. Please log in again."}), 401
     
     data = request.json
     event_ids = data.get('eventIds', [])
