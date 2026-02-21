@@ -43,6 +43,97 @@ document.addEventListener('DOMContentLoaded', () => {
             .replace(/'/g, "&#039;");
     }
 
+    
+    // Help Modal Logic
+    const helpBtn = document.getElementById('help-btn');
+    const readmeModal = document.getElementById('readme-modal');
+    const closeModal = readmeModal ? readmeModal.querySelector('.close-modal') : null;
+    const readmeContent = document.getElementById('readme-content');
+
+    function simpleMarkdownParser(text) {
+        let html = text
+            // Headers
+            .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+            .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+            .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+            // Bold
+            .replace(/\*\*(.*)\*\*/gim, '<b>$1</b>')
+            // Italic
+            .replace(/\*(.*)\*/gim, '<i>$1</i>')
+            // Links
+            .replace(/\[([^\]]+)\]\(([^)]+)\)/gim, '<a href="$2" target="_blank">$1</a>')
+            // Blockquotes
+            .replace(/^\> (.*$)/gim, '<blockquote>$1</blockquote>')
+            // Unordered Lists (simple)
+            .replace(/^\* (.*$)/gim, '<ul><li>$1</li></ul>')
+            // Fix double ULs (naive)
+            .replace(/<\/ul>\s*<ul>/gim, '')
+            
+            // 1. Normalize double newlines to a placeholder
+            .replace(/\n\n/gim, '{{double_newline}}')
+            
+            // 2. Remove single newlines after block elements (Header\nText -> HeaderText)
+            .replace(/(<\/h[1-6]>)\n/gim, '$1')
+            .replace(/(<\/ul>)\n/gim, '$1')
+            .replace(/(<\/blockquote>)\n/gim, '$1')
+            
+            // 3. Convert remaining single newlines to <br> (for line breaks inside paragraphs)
+            .replace(/\n/gim, '<br>')
+            
+            // 4. Handle double newline placeholders
+            // Remove double newlines after block elements (rely on CSS margins)
+            .replace(/(<\/h[1-6]>){{double_newline}}/gim, '$1')
+            .replace(/(<\/ul>){{double_newline}}/gim, '$1')
+            .replace(/(<\/blockquote>){{double_newline}}/gim, '$1')
+            
+            // Convert remaining double newlines to <br><br> for paragraph breaks in regular text
+            .replace(/{{double_newline}}/gim, '<br><br>');
+            
+        return html;
+    }
+
+    async function loadReadme() {
+        if (readmeContent.getAttribute('data-loaded') === 'true') {
+            readmeModal.style.display = 'flex';
+            return;
+        }
+
+        try {
+            const response = await fetch('INSTRUCTIONS.md');
+            if (!response.ok) throw new Error('Failed to load README');
+            const text = await response.text();
+            readmeContent.innerHTML = simpleMarkdownParser(text);
+            readmeContent.setAttribute('data-loaded', 'true');
+            readmeModal.style.display = 'flex';
+        } catch (error) {
+            console.error(error);
+            readmeContent.innerHTML = '<p style="color: red;">Error loading help documentation. Please check the README file directly.</p>';
+            readmeModal.style.display = 'flex';
+        }
+    }
+
+    if (helpBtn) {
+        helpBtn.addEventListener('click', loadReadme);
+    }
+
+    if (closeModal) {
+        closeModal.addEventListener('click', () => {
+            readmeModal.style.display = 'none';
+        });
+    }
+
+    window.addEventListener('click', (event) => {
+        if (event.target === readmeModal) {
+            readmeModal.style.display = 'none';
+        }
+    });
+
+    // Show help on first site visit
+    if (!localStorage.getItem('hasVisitedSite')) {
+        loadReadme();
+        localStorage.setItem('hasVisitedSite', 'true');
+    }
+
     async function checkAuthStatus() {
         try {
             const res = await fetch('/api/user');
@@ -57,6 +148,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     authBtn.textContent = 'Logout';
                     authBtn.href = '/logout';
                 }
+                
+                // Show help on first login
+                if (!localStorage.getItem('hasLoggedInBefore')) {
+                    loadReadme();
+                    localStorage.setItem('hasLoggedInBefore', 'true');
+                }
+
             } else {
                 if (emailDisplay) emailDisplay.style.display = 'none';
                 if (authBtn) {
