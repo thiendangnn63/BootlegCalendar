@@ -4,6 +4,7 @@
 
 ## Website's Objective
 
+Official website [here](https://www.bootlegcalendar.xyz)!
 It's a website where you can upload your classes' syllabi and then the website will find all relevant dates (lectures, exams,...). It then adds all those events to your Google Calendar.
 
 ## Usage
